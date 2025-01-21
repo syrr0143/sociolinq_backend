@@ -1,81 +1,141 @@
 import mongoose from "mongoose";
+import {
+  EMPLOYMENT_TYPES,
+  DEPARTMENTS,
+  GRADES,
+  ROLES,
+  CLASS_SCOPES,
+  MEDIUMS,
+  BOARDS,
+  SUBJECTS,
+  CATEGORIES,
+  JOB_STATUS,
+} from "../constants/enum.js";
 
-const jobSpecificSchema = new mongoose.Schema({
-  // Job-Specific Requirements
-  jobId: { type: String, required: true, unique: true },
-  title: { type: String, required: true },
-  employmentType: {
-    type: String,
-    enum: ["Full-time", "Part-time", "Contract", "Internship"],
-    required: true,
-  },
-  department: {
-    type: String,
-    enum: ["Engineering", "Marketing", "HR", "Finance", "Sales", "Operations"],
-    required: true,
-  },
-  grade: {
-    type: String,
-    enum: ["Junior", "Mid-level", "Senior", "Lead", "Manager", "Director"],
-    required: true,
-  },
-  role: {
-    type: String,
-    enum: [
-      "Software Engineer",
-      "HR Specialist",
-      "Marketing Manager",
-      "Product Manager",
-      "Sales Executive",
+const jobSchema = new mongoose.Schema(
+  {
+    jobId: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    schoolConfigId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "SchoolConfig",
+      required: true,
+    },
+    title: {
+      type: String,
+      required: true,
+    },
+    employmentType: {
+      type: String,
+      enum: EMPLOYMENT_TYPES,
+      required: true,
+    },
+    department: {
+      type: String,
+      enum: DEPARTMENTS,
+      required: true,
+    },
+    grade: {
+      type: String,
+      enum: GRADES,
+      required: true,
+    },
+    role: {
+      type: String,
+      enum: ROLES,
+      required: true,
+    },
+    classScope: [
+      {
+        type: String,
+        enum: CLASS_SCOPES,
+        required: true,
+      },
     ],
-    required: true,
+    workLocation: {
+      type: String,
+      required: true,
+    },
+    openPositions: {
+      type: Number,
+      required: true,
+      min: 1,
+    },
+    medium: [
+      {
+        type: String,
+        enum: MEDIUMS,
+        required: true,
+      },
+    ],
+    otherMedium: String,
+    boardOfEducation: [
+      {
+        type: String,
+        enum: BOARDS,
+        required: true,
+      },
+    ],
+    otherBoard: String,
+    subjectsTaught: [
+      {
+        type: String,
+        enum: SUBJECTS,
+        required: true,
+      },
+    ],
+    category: [
+      {
+        type: String,
+        enum: CATEGORIES,
+        required: true,
+      },
+    ],
+    otherCategory: String,
+    ageRequirement: {
+      min: { type: Number },
+      max: { type: Number },
+    },
+    experienceRequirement: {
+      min: { type: Number, required: true },
+      max: { type: Number },
+    },
+    qualificationRequirements: [
+      {
+        degree: {
+          type: String,
+          required: true,
+        },
+        otherDegree: String,
+        specialization: String,
+        otherSpecialization: String,
+        university: String,
+        otherUniversity: String,
+        minMarks: Number,
+      },
+    ],
+    jobDescription: {
+      content: String,
+      attachmentUrl: String,
+    },
+    status: {
+      type: String,
+      enum: JOB_STATUS,
+      default: "OPEN",
+    },
+    additionalComments: String,
   },
-  classScope: {
-    type: String,
-    enum: ["Entry Level", "Mid-Level", "Experienced", "Executive"],
-    required: true,
-  },
-  workLocation: {
-    type: String,
-    enum: ["Remote", "On-site", "Hybrid"],
-    required: true,
-  },
-  openPositions: { type: Number, required: true },
-  // candiadte specific requirements
-  medium: {
-    type: String,
-    enum: ["English", "Hindi", "Bilingual", "Others"],
-    required: true,
-  },
-  boardOfEducation: {
-    type: String,
-    enum: ["CBSE", "ICSE", "State Board", "International", "Other"],
-    required: true,
-  },
-  subjectTaught: {
-    type: [String],
-    required: true,
-  },
-  category: {
-    type: String,
-    enum: ["General", "OBC", "SC", "ST", "EWS"],
-    required: true,
-  },
-  minAge: { type: Number, required: true },
-  maxAge: { type: Number, required: true },
-  minExperience: { type: Number, required: true },
-  maxExperience: { type: Number, required: true },
-  degree: {
-    type: String,
-    enum: ["B.Tech", "M.Tech", "B.Sc", "M.Sc", "MBA", "PhD", "Other"],
-    required: true,
-  },
-  specialization: { type: String, required: true },
-  university: { type: String, required: true },
-  marksRequired: { type: Number, required: true },
-  jobDescriptionAttached: { type: String }, // url of file attached , uploaded somewhere
-  comment: { type: String },
-});
+  {
+    timestamps: true,
+  }
+);
 
-const Job = mongoose.model("Job", jobSpecificSchema);
+jobSchema.index({ schoolConfigId: 1 });
+jobSchema.index({ status: 1 });
+jobSchema.index({ department: 1, role: 1 });
+
+const Job = mongoose.model("Job", jobSchema);
 export default Job;

@@ -1,124 +1,100 @@
 import { z } from "zod";
+import {
+  EMPLOYMENT_TYPES,
+  DEPARTMENTS,
+  GRADES,
+  ROLES,
+  CLASS_SCOPES,
+  MEDIUMS,
+  BOARDS,
+  SUBJECTS,
+  CATEGORIES,
+  JOB_STATUS,
+} from "../constants/enum.js";
 
-export const jobSchema = z
-  .object({
-    jobId: z.string().length(7, "JobId must be exactly 7 characters"),
-    title: z.string().min(1, "Job title is required"),
-    employmentType: z.enum([
-      "Full-time",
-      "Part-time",
-      "Contract",
-      "Internship",
-    ]),
-    department: z.enum([
-      "Engineering",
-      "Marketing",
-      "HR",
-      "Finance",
-      "Sales",
-      "Operations",
-    ]),
-    grade: z.enum([
-      "Junior",
-      "Mid-level",
-      "Senior",
-      "Lead",
-      "Manager",
-      "Director",
-    ]),
-    role: z.enum([
-      "Software Engineer",
-      "HR Specialist",
-      "Marketing Manager",
-      "Product Manager",
-      "Sales Executive",
-    ]),
-    classScope: z.enum([
-      "Entry Level",
-      "Mid-Level",
-      "Experienced",
-      "Executive",
-    ]),
-    workLocation: z.enum(["Remote", "On-site", "Hybrid"]),
-
-    openPositions: z.preprocess(
-      (val) => parseInt(val, 10),
-      z.number().min(1, "At least one position is required")
-    ),
-
-    // Candidate-specific requirements
-    medium: z.enum(["English", "Hindi", "Bilingual", "Others"]),
-    boardOfEducation: z.enum([
-      "CBSE",
-      "ICSE",
-      "State Board",
-      "International",
-      "Other",
-    ]),
-    subjectTaught: z.preprocess(
-      (val) => (typeof val === "string" ? val.split(",") : val),
-      z.array(z.string()).min(1, "At least one subject must be taught")
-    ),
-    category: z.enum(["General", "OBC", "SC", "ST", "EWS"]),
-
-    // Age validation
-    minAge: z.preprocess(
-      (val) => parseInt(val, 10),
-      z.number().min(18, "Minimum age should be at least 18")
-    ),
-    maxAge: z.preprocess(
-      (val) => parseInt(val, 10),
-      z.number().min(18, "Maximum age should be at least 18")
-    ),
-
-    // Experience validation
-    minExperience: z.preprocess(
-      (val) => parseInt(val, 10),
-      z.number().min(0, "Experience should be a positive number")
-    ),
-    maxExperience: z.preprocess(
-      (val) => parseInt(val, 10),
-      z.number().min(0, "Experience should be a positive number")
-    ),
-
-    degree: z.enum(["B.Tech", "M.Tech", "B.Sc", "M.Sc", "MBA", "PhD", "Other"]),
-    specialization: z.string().min(1, "Specialization is required"),
-    university: z.string().min(1, "University is required"),
-    marksRequired: z.preprocess(
-      (val) => parseInt(val, 10),
-      z.number().min(0, "Marks required should be a positive number")
-    ),
-    jobDescriptionAttached: z.string().url().optional(),
-    comment: z.string().optional(),
-  })
-  .refine(
-    (data) => {
-      if (data.minAge != null && data.maxAge != null) {
-        return data.maxAge >= data.minAge;
-      }
-      return true;
-    },
-    {
-      message: "Maximum age must be greater than or equal to minimum age",
-      path: ["maxAge"],
-    }
-  )
-  .refine(
-    (data) => {
-      if (data.minExperience != null && data.maxExperience != null) {
-        return data.maxExperience >= data.minExperience;
-      }
-      return true;
-    },
-    {
-      message:
-        "Maximum experience must be greater than or equal to minimum experience",
-      path: ["maxExperience"],
-    }
-  );
+// Define the Zod schema for job creation validation
+export const jobCreationSchema = z.object({
+  jobId: z.string().min(1, "Job ID is required").max(255, "Job ID is too long"),
+  schoolConfigId: z.string().min(1, "School Config ID is required"),
+  title: z
+    .string()
+    .min(1, "Job title is required")
+    .max(255, "Job title is too long"),
+  employmentType: z.enum(EMPLOYMENT_TYPES, "Invalid employment type"),
+  department: z.enum(DEPARTMENTS, "Invalid department"),
+  grade: z.enum(GRADES, "Invalid grade"),
+  role: z.enum(ROLES, "Invalid role"),
+  classScope: z
+    .array(z.enum(CLASS_SCOPES))
+    .min(1, "At least one class scope is required"),
+  workLocation: z.string().min(1, "Work location is required"),
+  openPositions: z.number().min(1, "Open positions must be at least 1"),
+  medium: z.array(z.enum(MEDIUMS)).min(1, "At least one medium is required"),
+  otherMedium: z.string().optional(),
+  boardOfEducation: z
+    .array(z.enum(BOARDS))
+    .min(1, "At least one board of education is required"),
+  otherBoard: z.string().optional(),
+  subjectsTaught: z
+    .array(z.enum(SUBJECTS))
+    .min(1, "At least one subject is required"),
+  category: z
+    .array(z.enum(CATEGORIES))
+    .min(1, "At least one category is required"),
+  otherCategory: z.string().optional(),
+  ageRequirement: z
+    .object({
+      min: z.number().optional(),
+      max: z
+        .number()
+        .optional()
+        .refine((value, ctx) => {
+          if (ctx.parent.min && value && ctx.parent.min > value) {
+            return false;
+          }
+          return true;
+        }, "Max age must not be less than Min age"),
+    })
+    .optional(),
+  experienceRequirement: z
+    .object({
+      min: z.number().min(0, "Min experience must be at least 0"),
+      max: z
+        .number()
+        .optional()
+        .refine((value, ctx) => {
+          if (ctx.parent.min && value && ctx.parent.min > value) {
+            return false;
+          }
+          return true;
+        }, "Max experience must not be less than Min experience"),
+    })
+    .required(),
+  qualificationRequirements: z
+    .array(
+      z.object({
+        degree: z.string().min(1, "Degree is required"),
+        otherDegree: z.string().optional(),
+        specialization: z.string().optional(),
+        otherSpecialization: z.string().optional(),
+        university: z.string().optional(),
+        otherUniversity: z.string().optional(),
+        minMarks: z.number().optional(),
+      })
+    )
+    .optional(),
+  jobDescription: z
+    .object({
+      content: z.string().optional(),
+      attachmentUrl: z.string().url("Invalid URL").optional(),
+    })
+    .optional(),
+  status: z.enum(JOB_STATUS).optional().default("DRAFT"),
+  additionalComments: z.string().optional(),
+});
 
 export const employmentTypeValidator = z.object({
-  employmentType: z.enum(["Full-time", "Part-time", "Contract", "Internship"], {
+  employmentType: z.enum(["Full-time", "Contract", "Internship"], {
     errorMap: () => ({
       message:
         "Employment type must be one of 'Full-time', 'Part-time', 'Contract', or 'Internship'.",
