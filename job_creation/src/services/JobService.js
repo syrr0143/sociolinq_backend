@@ -6,12 +6,18 @@ import { validate } from "../validators/validate.js";
 class JobService {
   async createJob(jobData) {
     try {
-      validate(jobCreationSchema);
-      const newJob = new Job(jobData);
-      await newJob.save();
-      return newJob;
+      const validatedData = jobCreationSchema.parse(jobData);
+      const newJob = new Job(validatedData);
+      return await newJob.save();
     } catch (error) {
-      throw new CustomError("Error creating job", 500);
+      if (error.errors) {
+        // Mongoose validation error
+        const messages = Object.values(error.errors)
+          .map((err) => err.message)
+          .join(", ");
+        throw new Error(`Validation failed: ${messages}`);
+      }
+      throw new CustomError(error);
     }
   }
 

@@ -12,74 +12,105 @@ import {
   JOB_STATUS,
 } from "../constants/enum.js";
 
-// Define the Zod schema for job creation validation
 export const jobCreationSchema = z.object({
   jobId: z.string().min(1, "Job ID is required").max(255, "Job ID is too long"),
   schoolConfigId: z.string().min(1, "School Config ID is required"),
-  title: z
+  employmentType: z
     .string()
-    .min(1, "Job title is required")
-    .max(255, "Job title is too long"),
-  employmentType: z.enum(EMPLOYMENT_TYPES, "Invalid employment type"),
-  department: z.enum(DEPARTMENTS, "Invalid department"),
-  grade: z.enum(GRADES, "Invalid grade"),
-  role: z.enum(ROLES, "Invalid role"),
+    .transform((val) => val.toUpperCase())
+    .refine((val) => EMPLOYMENT_TYPES.includes(val), {
+      message: `Employment type must be one of: ${EMPLOYMENT_TYPES.join(", ")}`,
+    }),
+  department: z
+    .string()
+    .transform((val) => val.toUpperCase())
+    .refine((val) => DEPARTMENTS.includes(val), {
+      message: `Department must be one of: ${DEPARTMENTS.join(", ")}`,
+    }),
+  grade: z
+    .string()
+    .transform((val) => val.toUpperCase())
+    .refine((val) => GRADES.includes(val), "Invalid grade"),
+  role: z
+    .string()
+    .transform((val) => val.toUpperCase())
+    .refine((val) => ROLES.includes(val), "Invalid role"),
   classScope: z
-    .array(z.enum(CLASS_SCOPES))
-    .min(1, "At least one class scope is required"),
-  workLocation: z.string().min(1, "Work location is required"),
+    .array(z.string())
+    .transform((arr) => arr.map((val) => val.toUpperCase()))
+    .refine((scopes) => scopes.every((scope) => CLASS_SCOPES.includes(scope)), {
+      message: `Class scope must be one of: ${CLASS_SCOPES.join(", ")}`,
+    }),
+  workLocation: z
+    .string()
+    .min(1, "Work location is required")
+    .transform((val) => val.toUpperCase()),
   openPositions: z.number().min(1, "Open positions must be at least 1"),
-  medium: z.array(z.enum(MEDIUMS)).min(1, "At least one medium is required"),
-  otherMedium: z.string().optional(),
+  medium: z
+    .array(z.string().transform((val) => val.toUpperCase()))
+    .refine(
+      (mediums) => mediums.every((medium) => MEDIUMS.includes(medium)),
+      "Invalid medium"
+    ),
+  otherMedium: z.string().nullable().optional(),
   boardOfEducation: z
-    .array(z.enum(BOARDS))
-    .min(1, "At least one board of education is required"),
-  otherBoard: z.string().optional(),
+    .array(z.string().transform((val) => val.toUpperCase()))
+    .refine(
+      (boards) => boards.every((board) => BOARDS.includes(board)),
+      "Invalid board of education"
+    ),
+  otherBoard: z.string().nullable().optional(),
   subjectsTaught: z
-    .array(z.enum(SUBJECTS))
-    .min(1, "At least one subject is required"),
+    .array(z.string().transform((val) => val.toUpperCase()))
+    .refine(
+      (subjects) => subjects.every((subject) => SUBJECTS.includes(subject)),
+      "Invalid subject"
+    ),
   category: z
-    .array(z.enum(CATEGORIES))
-    .min(1, "At least one category is required"),
-  otherCategory: z.string().optional(),
+    .array(z.string().transform((val) => val.toUpperCase()))
+    .refine(
+      (categories) =>
+        categories.every((category) => CATEGORIES.includes(category)),
+      "Invalid category"
+    ),
+  otherCategory: z.string().nullable().optional(),
   ageRequirement: z
     .object({
-      min: z.number().optional(),
-      max: z
-        .number()
-        .optional()
-        .refine((value, ctx) => {
-          if (ctx.parent.min && value && ctx.parent.min > value) {
-            return false;
-          }
-          return true;
-        }, "Max age must not be less than Min age"),
+      min: z.number().nullable().optional(),
+      max: z.number().nullable().optional(),
     })
-    .optional(),
+    .optional()
+    .superRefine((data, ctx) => {
+      if (data?.min != null && data?.max != null && data.min > data.max) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Max age must not be less than Min age",
+        });
+      }
+    }),
   experienceRequirement: z
     .object({
       min: z.number().min(0, "Min experience must be at least 0"),
-      max: z
-        .number()
-        .optional()
-        .refine((value, ctx) => {
-          if (ctx.parent.min && value && ctx.parent.min > value) {
-            return false;
-          }
-          return true;
-        }, "Max experience must not be less than Min experience"),
+      max: z.number().nullable().optional(),
     })
-    .required(),
+    .superRefine((data, ctx) => {
+      if (data?.min != null && data?.max != null && data.min > data.max) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Max experience must not be less than Min experience",
+        });
+      }
+    }),
   qualificationRequirements: z
     .array(
       z.object({
         degree: z.string().min(1, "Degree is required"),
-        otherDegree: z.string().optional(),
-        specialization: z.string().optional(),
-        otherSpecialization: z.string().optional(),
-        university: z.string().optional(),
-        otherUniversity: z.string().optional(),
-        minMarks: z.number().optional(),
+        otherDegree: z.string().nullable().optional(),
+        specialization: z.string().nullable().optional(),
+        otherSpecialization: z.string().nullable().optional(),
+        university: z.string().nullable().optional(),
+        otherUniversity: z.string().nullable().optional(),
+        minMarks: z.number().nullable().optional(),
       })
     )
     .optional(),
@@ -89,15 +120,21 @@ export const jobCreationSchema = z.object({
       attachmentUrl: z.string().url("Invalid URL").optional(),
     })
     .optional(),
-  status: z.enum(JOB_STATUS).optional().default("DRAFT"),
+  status: z
+    .string()
+    .transform((val) => val.toUpperCase())
+    .refine((val) => JOB_STATUS.includes(val), "Invalid status")
+    .optional()
+    .default("OPEN"),
   additionalComments: z.string().optional(),
 });
 
 export const employmentTypeValidator = z.object({
-  employmentType: z.enum(["Full-time", "Contract", "Internship"], {
-    errorMap: () => ({
+  employmentType: z
+    .string()
+    .transform((val) => val.toUpperCase())
+    .refine((val) => ["FULL-TIME", "CONTRACT", "INTERNSHIP"].includes(val), {
       message:
-        "Employment type must be one of 'Full-time', 'Part-time', 'Contract', or 'Internship'.",
+        "Employment type must be one of 'FULL-TIME', 'CONTRACT', or 'INTERNSHIP'.",
     }),
-  }),
 });

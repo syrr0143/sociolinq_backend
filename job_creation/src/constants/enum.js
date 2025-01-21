@@ -1,61 +1,69 @@
 // src/constants/enums.js
-export const EMPLOYMENT_TYPES = ["Full-time", "Contract", "Internship"];
+export const EMPLOYMENT_TYPES = ["FULL-TIME", "CONTRACT", "INTERNSHIP"];
 
 export const DEPARTMENTS = [
-  "Academic",
-  "Administration",
-  "Laboratory",
-  "Accounts",
-  "Marketing",
-  "Human Resources",
-  "Operations",
+  "ACADEMIC",
+  "ADMINISTRATION",
+  "LABORATORY",
+  "ACCOUNTS",
+  "MARKETING",
+  "HUMAN RESOURCES",
+  "OPERATIONS",
 ];
-export const GRADES = ["Junior", "Senior", "Lead", "Head"];
+
+export const GRADES = ["JUNIOR", "SENIOR", "LEAD", "HEAD"];
+
 export const ROLES = [
-  "Principal",
-  "Vice Principal",
-  "Head of Department",
-  "Senior Teacher",
-  "Junior Teacher",
-  "Assistant Teacher",
-  "Laboratory Assistant",
-  "HR Manager",
-  "Admin Lead",
-  "Marketing Manager",
-  "Coordinator",
-  "Accountant",
-  "Caretaker",
+  "PRINCIPAL",
+  "VICE PRINCIPAL",
+  "HEAD OF DEPARTMENT",
+  "SENIOR TEACHER",
+  "JUNIOR TEACHER",
+  "ASSISTANT TEACHER",
+  "LABORATORY ASSISTANT",
+  "HR MANAGER",
+  "ADMIN LEAD",
+  "MARKETING MANAGER",
+  "COORDINATOR",
+  "ACCOUNTANT",
+  "CARETAKER",
 ];
+
 export const CLASS_SCOPES = [
-  "Pre-primary",
-  "Primary",
-  "Secondary",
-  "Higher Secondary",
+  "PRE-PRIMARY",
+  "PRIMARY",
+  "SECONDARY",
+  "HIGHER SECONDARY",
 ];
-export const MEDIUMS = ["English", "Bengali", "Hindi", "Others"];
-export const BOARDS = ["CBSE", "ICSE", "ISC", "WBBSE", "WBCHSE", "Other"];
+
+export const MEDIUMS = ["ENGLISH", "BENGALI", "HINDI", "OTHERS"];
+
+export const BOARDS = ["CBSE", "ICSE", "ISC", "WBBSE", "WBCHSE", "OTHER"];
+
 export const SUBJECTS = [
-  "English",
-  "Mathematics",
-  "Science",
-  "Physics",
-  "Chemistry",
-  "Biology",
-  "Computer Science",
-  "History",
-  "Geography",
-  "Economics",
-  "Business Studies",
-  "Accountancy",
-  "Physical Education",
+  "ENGLISH",
+  "MATHEMATICS",
+  "SCIENCE",
+  "PHYSICS",
+  "CHEMISTRY",
+  "BIOLOGY",
+  "COMPUTER SCIENCE",
+  "HISTORY",
+  "GEOGRAPHY",
+  "ECONOMICS",
+  "BUSINESS STUDIES",
+  "ACCOUNTANCY",
+  "PHYSICAL EDUCATION",
 ];
+
 export const CATEGORIES = [
-  "General",
+  "GENERAL",
   "OBC-A",
   "OBC-B",
   "SC",
   "ST",
   "EWS",
-  "PwD",
+  "PWD",
 ];
+
 export const JOB_STATUS = ["DRAFT", "OPEN", "CLOSED"];

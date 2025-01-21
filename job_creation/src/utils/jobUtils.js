@@ -4,6 +4,9 @@ import { CustomError } from "./customResponse.js";
 class JobUtils {
   async getJobId(employmentType) {
     try {
+      if (!employmentType) {
+        throw new CustomError("employmentType not provided", 400);
+      }
       const currentYear = new Date().getFullYear();
       let lastJobId = await JobService.getLastJobId();
 
