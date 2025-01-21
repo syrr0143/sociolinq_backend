@@ -22,6 +22,14 @@ class JobService {
       throw new CustomError("Error retrieving job", 500);
     }
   }
+  async getAllJob() {
+    try {
+      const job = await Job.findOne();
+      return job;
+    } catch (error) {
+      throw new CustomError("Error retrieving job", 500);
+    }
+  }
 
   async getLastJobId() {
     try {

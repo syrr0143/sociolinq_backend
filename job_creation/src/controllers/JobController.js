@@ -14,7 +14,7 @@ class JobController {
         jobDescriptionUrl = uploadResult.secure_url;
       }
       jobData.jobDescriptionAttached = jobDescriptionUrl;
-      
+
       const newJob = await JobService.createJob(jobData);
       apiResponse.success(res, "Job created successfully", newJob);
     } catch (error) {
@@ -25,10 +25,9 @@ class JobController {
       }
     }
   }
-  async getJob(req, res) {
+  async getAllJob(req, res) {
     try {
-      const jobId = req.params.id;
-      const job = await JobService.getJob(jobId);
+      const job = await JobService.getAllJob();
       if (!job) {
         throw new CustomError("Job not found", 404);
       }

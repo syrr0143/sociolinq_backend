@@ -21,5 +21,6 @@ router.post(
   validate(employmentTypeValidator),
   JobController.createNewJobId
 );
+router.get("/job", JobController.getAllJob);
 
 export default router;
