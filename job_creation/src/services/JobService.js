@@ -12,11 +12,13 @@ class JobService {
     } catch (error) {
       if (error.errors) {
         // Mongoose validation error
+        console.log("errorr", error);
         const messages = Object.values(error.errors)
           .map((err) => err.message)
           .join(", ");
         throw new Error(`Validation failed: ${messages}`);
       }
+      console.log("errorr", error);
       throw new CustomError(error);
     }
   }

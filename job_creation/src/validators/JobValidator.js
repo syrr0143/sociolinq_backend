@@ -12,62 +12,66 @@ import {
   JOB_STATUS,
 } from "../constants/enum.js";
 
+const capitalizeString = (val) => {
+  return val.charAt(0).toUpperCase() + val.slice(1).toLowerCase();
+};
+
 export const jobCreationSchema = z.object({
   jobId: z.string().min(1, "Job ID is required").max(255, "Job ID is too long"),
-  schoolConfigId: z.string().min(1, "School Config ID is required"),
+  schoolId: z.string().min(1, "School Config ID is required"),
   employmentType: z
     .string()
-    .transform((val) => val.toUpperCase())
+    .transform(capitalizeString)
     .refine((val) => EMPLOYMENT_TYPES.includes(val), {
       message: `Employment type must be one of: ${EMPLOYMENT_TYPES.join(", ")}`,
     }),
   department: z
     .string()
-    .transform((val) => val.toUpperCase())
+    .transform(capitalizeString)
     .refine((val) => DEPARTMENTS.includes(val), {
       message: `Department must be one of: ${DEPARTMENTS.join(", ")}`,
     }),
   grade: z
     .string()
-    .transform((val) => val.toUpperCase())
+    .transform(capitalizeString)
     .refine((val) => GRADES.includes(val), "Invalid grade"),
   role: z
     .string()
-    .transform((val) => val.toUpperCase())
+    .transform(capitalizeString)
     .refine((val) => ROLES.includes(val), "Invalid role"),
   classScope: z
     .array(z.string())
-    .transform((arr) => arr.map((val) => val.toUpperCase()))
+    .transform((arr) => arr.map(capitalizeString))
     .refine((scopes) => scopes.every((scope) => CLASS_SCOPES.includes(scope)), {
       message: `Class scope must be one of: ${CLASS_SCOPES.join(", ")}`,
     }),
   workLocation: z
     .string()
     .min(1, "Work location is required")
-    .transform((val) => val.toUpperCase()),
+    .transform(capitalizeString),
   openPositions: z.number().min(1, "Open positions must be at least 1"),
   medium: z
-    .array(z.string().transform((val) => val.toUpperCase()))
+    .array(z.string().transform(capitalizeString))
     .refine(
       (mediums) => mediums.every((medium) => MEDIUMS.includes(medium)),
       "Invalid medium"
     ),
   otherMedium: z.string().nullable().optional(),
   boardOfEducation: z
-    .array(z.string().transform((val) => val.toUpperCase()))
+    .array(z.string())
     .refine(
       (boards) => boards.every((board) => BOARDS.includes(board)),
       "Invalid board of education"
     ),
   otherBoard: z.string().nullable().optional(),
   subjectsTaught: z
-    .array(z.string().transform((val) => val.toUpperCase()))
+    .array(z.string().transform(capitalizeString))
     .refine(
       (subjects) => subjects.every((subject) => SUBJECTS.includes(subject)),
       "Invalid subject"
     ),
   category: z
-    .array(z.string().transform((val) => val.toUpperCase()))
+    .array(z.string().transform(capitalizeString))
     .refine(
       (categories) =>
         categories.every((category) => CATEGORIES.includes(category)),
@@ -122,7 +126,7 @@ export const jobCreationSchema = z.object({
     .optional(),
   status: z
     .string()
-    .transform((val) => val.toUpperCase())
+    .transform(capitalizeString)
     .refine((val) => JOB_STATUS.includes(val), "Invalid status")
     .optional()
     .default("OPEN"),
@@ -132,9 +136,9 @@ export const jobCreationSchema = z.object({
 export const employmentTypeValidator = z.object({
   employmentType: z
     .string()
-    .transform((val) => val.toUpperCase())
-    .refine((val) => ["FULL-TIME", "CONTRACT", "INTERNSHIP"].includes(val), {
+    .transform(capitalizeString)
+    .refine((val) => ["Full-Time", "Contract", "Internship"].includes(val), {
       message:
-        "Employment type must be one of 'FULL-TIME', 'CONTRACT', or 'INTERNSHIP'.",
+        "Employment type must be one of 'Full-Time', 'Contract', 'Internship'.",
     }),
 });

@@ -12,6 +12,14 @@ import {
   JOB_STATUS,
 } from "../constants/enum.js";
 
+const capitalizeFirstLetter = (val) => {
+  return val.replace(/\b\w/g, (c) => c.toUpperCase());
+};
+
+const capitalizeArray = (arr) => {
+  return arr.map((item) => capitalizeFirstLetter(item));
+};
+
 const jobSchema = new mongoose.Schema(
   {
     jobId: {
@@ -19,9 +27,9 @@ const jobSchema = new mongoose.Schema(
       required: true,
       unique: true,
     },
-    schoolConfigId: {
+    schoolId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "SchoolConfig",
+      ref: "School",
       required: true,
     },
     employmentType: {
@@ -33,7 +41,7 @@ const jobSchema = new mongoose.Schema(
           EMPLOYMENT_TYPES.join(", "),
       },
       required: true,
-      set: (v) => v?.toUpperCase(),
+      set: (v) => capitalizeFirstLetter(v),
     },
     department: {
       type: String,
@@ -43,7 +51,7 @@ const jobSchema = new mongoose.Schema(
           "{VALUE} is not supported. Must be one of: " + DEPARTMENTS.join(", "),
       },
       required: true,
-      set: (v) => v?.toUpperCase(),
+      set: (v) => capitalizeFirstLetter(v),
     },
     grade: {
       type: String,
@@ -53,7 +61,7 @@ const jobSchema = new mongoose.Schema(
           "{VALUE} is not supported. Must be one of: " + GRADES.join(", "),
       },
       required: true,
-      set: (v) => v?.toUpperCase(),
+      set: (v) => capitalizeFirstLetter(v),
     },
     role: {
       type: String,
@@ -63,7 +71,7 @@ const jobSchema = new mongoose.Schema(
           "{VALUE} is not supported. Must be one of: " + ROLES.join(", "),
       },
       required: true,
-      set: (v) => v?.toUpperCase(),
+      set: (v) => capitalizeFirstLetter(v),
     },
     classScope: [
       {
@@ -75,7 +83,7 @@ const jobSchema = new mongoose.Schema(
             CLASS_SCOPES.join(", "),
         },
         required: true,
-        set: (v) => v?.toUpperCase(),
+        set: (v) => capitalizeFirstLetter(v),
       },
     ],
     workLocation: {
@@ -96,7 +104,7 @@ const jobSchema = new mongoose.Schema(
             "{VALUE} is not supported. Must be one of: " + MEDIUMS.join(", "),
         },
         required: true,
-        set: (v) => v?.toUpperCase(),
+        set: (v) => capitalizeFirstLetter(v),
       },
     ],
     otherMedium: String,
@@ -109,7 +117,7 @@ const jobSchema = new mongoose.Schema(
             "{VALUE} is not supported. Must be one of: " + BOARDS.join(", "),
         },
         required: true,
-        set: (v) => v?.toUpperCase(),
+        set: (v) => capitalizeFirstLetter(v),
       },
     ],
     otherBoard: String,
@@ -122,7 +130,7 @@ const jobSchema = new mongoose.Schema(
             "{VALUE} is not supported. Must be one of: " + SUBJECTS.join(", "),
         },
         required: true,
-        set: (v) => v?.toUpperCase(),
+        set: (v) => capitalizeFirstLetter(v),
       },
     ],
     category: [
@@ -135,7 +143,7 @@ const jobSchema = new mongoose.Schema(
             CATEGORIES.join(", "),
         },
         required: true,
-        set: (v) => v?.toUpperCase(),
+        set: (v) => capitalizeFirstLetter(v),
       },
     ],
     otherCategory: String,
@@ -173,7 +181,7 @@ const jobSchema = new mongoose.Schema(
           "{VALUE} is not supported. Must be one of: " + JOB_STATUS.join(", "),
       },
       required: true,
-      set: (v) => v?.toUpperCase(),
+      set: (v) => capitalizeFirstLetter(v),
     },
     additionalComments: String,
   },
@@ -181,24 +189,8 @@ const jobSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
-jobSchema.pre("validate", function (next) {
-  if (this.employmentType)
-    this.employmentType = this.employmentType.toUpperCase();
-  if (this.department) this.department = this.department.toUpperCase();
-  if (this.grade) this.grade = this.grade.toUpperCase();
-  if (this.role) this.role = this.role.toUpperCase();
-  if (this.classScope)
-    this.classScope = this.classScope.map((scope) => scope.toUpperCase());
-  if (this.medium) this.medium = this.medium.map((m) => m.toUpperCase());
-  if (this.boardOfEducation)
-    this.boardOfEducation = this.boardOfEducation.map((b) => b.toUpperCase());
-  if (this.subjectsTaught)
-    this.subjectsTaught = this.subjectsTaught.map((s) => s.toUpperCase());
-  if (this.category) this.category = this.category.map((c) => c.toUpperCase());
-  next();
-});
 
-jobSchema.index({ schoolConfigId: 1 });
+jobSchema.index({ schoolId: 1 });
 jobSchema.index({ status: 1 });
 jobSchema.index({ department: 1, role: 1 });
 
